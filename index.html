@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title>Météo</title>
+</head>
+<body>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#meteoModal">
+        Météo
+    </button>
+    <div class="modal fade" id="meteoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Mon encart météo</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <div id="currentMeteo" class="d-flex justify-content-center"></div>
+                <div id="nextMeteo" class="d-flex justify-content-center"></div>
+            </div>
+            <div class="modal-footer">
+                <form class="form-inline my-2 my-lg-0">
+                    <input id="inputSearch" type="text" placeholder="Toulon" name="lastname" class="form-control mr-sm-2">
+                    <br>
+                    <input id="btnSearch" type="submit" value="Rafraîchir" class="btn btn-primary m-1">
+                    <button type="button" class="btn btn-secondary m-1" data-dismiss="modal">Fermer</button>
+
+                </form>
+            </div>
+          </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>
