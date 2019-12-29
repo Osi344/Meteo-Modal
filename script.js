@@ -1,19 +1,51 @@
+class Refresh {
+    constructor() {
+        this.refreshButton= document.getElementById('btnSearch');
+    }
+
+    getState(){
+        let state= 0;
+        if (this.refreshButton.classList.contains('btn-success')) {
+            state++;
+        }
+        console.log(`state:${state}`);
+        return state;
+    }
+
+    doRefresh(){
+        if (this.getState()){
+            console.log(`url match:${myCities['match']}`);
+            getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['match']}`, 1);
+        }
+    }
+
+    toggleButton (aClass,bClass,blinkState){
+        // let normalAClass= `btn-${aClass}`;
+        // let outlineAClass= `btn-outline-${aClass}`;
+        // let normalBClass= `btn-${bClass}`;
+        // let outlineBClass= `btn-outline-${bClass}`;
+        this.refreshButton.classList.remove(aClass);
+        this.refreshButton.classList.add(bClass);
+        // if (blinkState) {
+        //     let outlineBClass= "";
+        //     if (bClass= /^(btn-)(.+)$/) {
+        //         outlineBClass= $1 + "outline-" + $2;
+        //     }
+        //     toggleRefreshButton (bClass,outlineBClass,0);
+        //     toggleRefreshButton (outlineBClass,bClass,0);
+        // }
+    }
+}
 
 class Cities {
     constructor() {
         // this.data = respsonse;
         this.list = [];
+        this.match =  "";
     }
 
     addCityToList(newCity) {
         this.list.push(newCity);
-    }
-
-    removeCityFromList() {
-        if (this.index > 1) {
-            this['list'][this['index']] = [];
-            this.index--;
-        }
     }
 }
 
@@ -23,41 +55,6 @@ class City {
         this.url = url;
         this.index = index;
     }
-    // 18 / name: Affligem
-    // 18 / npa: 1790
-    // 18 / region: 
-    // 18 / country: BEL
-    // 18 / url: affligem
-
-    // dispatchData() {
-    //     console.log("dispatchData");
-    //     for (let key in this.data) {
-    //         switch (key) {
-    //             case "name":
-    //                 this.name = key;
-    //                 break;
-    //             case "npa":
-    //                 this.npa = key;
-    //                 break;
-    //             case "region":
-    //                 this.region = key;
-    //                 break;
-    //             case "url":
-    //                 this.url = key;
-    //                 break;
-    //             default:
-    //                 break;
-    //         }
-    //     }
-    //     this.nameLength = this.name.length;
-    // }
-
-    // show() {
-    //     console.log(`name:${this['name']}`);
-    //     console.log(`npa:${this['npa']}`);
-    //     console.log(`region:${this['region']}`);
-    //     console.log(`url:${this['url']}`);
-    // }
 }
 
 class MeteoCard {
@@ -119,6 +116,8 @@ class MeteoCard {
             </div>`;
     }
 }
+
+let myRefreshButton = new Refresh();
 let myCities = new Cities();
 let countryFilter = "FRA";
 // https://cors-anywhere.herokuapp.com/https://www.prevision-meteo.ch/services/json/list-cities
@@ -178,37 +177,6 @@ function getCities(list) {
     }
 }
 
-// function toggleRefreshButton (aClass,bClass,blinkState){
-//     let normalAClass= `btn-${aClass}`;
-//     let outlineAClass= `btn-outline-${aClass}`;
-//     let normalBClass= `btn-${bClass}`;
-//     let outlineBClass= `btn-outline-${bClass}`;
-//     let buttonElement= document.getElementById('btnSearch');
-//     buttonElement.classList.remove(aClass);
-//     buttonElement.classList.add(bClass);
-//     if (blinkState) {
-//         buttonElement.classList.remove(normalBClass);
-//         buttonElement.classList.add(outlineBClass);
-        
-//     }
-// }
-function toggleRefreshButton (aClass,bClass,blinkState){
-    // let normalAClass= `btn-${aClass}`;
-    // let outlineAClass= `btn-outline-${aClass}`;
-    // let normalBClass= `btn-${bClass}`;
-    // let outlineBClass= `btn-outline-${bClass}`;
-    let buttonElement= document.getElementById('btnSearch');
-    buttonElement.classList.remove(aClass);
-    buttonElement.classList.add(bClass);
-    if (blinkState) {
-        let outlineBClass= "";
-        if (bClass= /^(btn-)(.*)$/){
-            outlineBClass= $1 + "outline-" + $2;
-        }
-        toggleRefreshButton (bClass,outlineBClass,0);
-        toggleRefreshButton (outlineBClass,bClass,0);
-    }
-}
 
 function checkCities(searchString) {
     // set search
@@ -224,19 +192,18 @@ function checkCities(searchString) {
         let lowName = searchCities['list'][city]['name'].toLowerCase();
         var foundB = lowName.match(regex);
         if (searchCities['list'][city]['name'] === searchString) {
+            myCities['match']= searchCities['list'][city]['url'];
+            console.log(`url:${searchCities['list'][city]['url']}`);
             // console.log("\t\tsuper");
-            toggleRefreshButton('btn-warning','btn-success',1);
-            // getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['list'][city]['url']}`, 1);
+            myRefreshButton.toggleButton('btn-warning','btn-success',1);
         }
         // 
         else if (foundB) {
             if (! resetList) {
-                toggleRefreshButton('btn-success','btn-warning',1);
+                myRefreshButton.toggleButton('btn-success','btn-warning',1);
                 myCities.list= [];
                 resetList++;
             }
-            // console.log(`\tcities: " + ${city['name']}`);
-            document.getElementById('btnSearch').classList.add('btn-success');
             myCities.addCityToList(searchCities['list'][city]);
         }
     }
@@ -258,10 +225,15 @@ const getMeteoAsync = async function (address, choice) {
 getMeteoAsync("https://cors-anywhere.herokuapp.com/https://www.prevision-meteo.ch/services/json/list-cities", 0);
 getMeteoAsync("https://www.prevision-meteo.ch/services/json/toulon", 1);
 
-let cityEntry = document.getElementById('inputSearch');
-cityEntry.addEventListener('input', function (e) {
-    toggleRefreshButton('btn-success','btn-warning',0);
+let $cityEntry = document.getElementById('inputSearch');
+$cityEntry.addEventListener('input', function (e) {
+    myRefreshButton.toggleButton('btn-success','btn-warning',0);
     if (e.target.value.length > 2) {
         checkCities(e.target.value)
     }
 });
+
+const $refreshButton= document.getElementById('btnSearch');
+$refreshButton.addEventListener('click', function(){
+    myRefreshButton.doRefresh();
+})
