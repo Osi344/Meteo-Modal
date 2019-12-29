@@ -2,12 +2,11 @@
 class Cities {
     constructor() {
         // this.data = respsonse;
-        this.index = 0;
         this.list = [];
     }
 
     addCityToList(newCity) {
-        this['list'][this['index']].push(newCity);
+        this.list.push(newCity);
     }
 
     removeCityFromList() {
@@ -179,36 +178,69 @@ function getCities(list) {
     }
 }
 
-function checkCities(string) {
-    let lowString = string.toLowerCase();
-    let regex = `/^(${lowString}).*/`;
-
-    for (let city of myCities['list'][myCities['index']]) {
-        let lowName = city['name'].toLowerCase();
-        var foundB = lowName.match(regex);
-        if (foundB) {
-            console.log(`\tcities: " + ${city['name']}`);
-            if (city['name'] === string) {
-                console.log("\t\tsuper");
-            }
+// function toggleRefreshButton (aClass,bClass,blinkState){
+//     let normalAClass= `btn-${aClass}`;
+//     let outlineAClass= `btn-outline-${aClass}`;
+//     let normalBClass= `btn-${bClass}`;
+//     let outlineBClass= `btn-outline-${bClass}`;
+//     let buttonElement= document.getElementById('btnSearch');
+//     buttonElement.classList.remove(aClass);
+//     buttonElement.classList.add(bClass);
+//     if (blinkState) {
+//         buttonElement.classList.remove(normalBClass);
+//         buttonElement.classList.add(outlineBClass);
+        
+//     }
+// }
+function toggleRefreshButton (aClass,bClass,blinkState){
+    // let normalAClass= `btn-${aClass}`;
+    // let outlineAClass= `btn-outline-${aClass}`;
+    // let normalBClass= `btn-${bClass}`;
+    // let outlineBClass= `btn-outline-${bClass}`;
+    let buttonElement= document.getElementById('btnSearch');
+    buttonElement.classList.remove(aClass);
+    buttonElement.classList.add(bClass);
+    if (blinkState) {
+        let outlineBClass= "";
+        if (bClass= /^(btn-)(.*)$/){
+            outlineBClass= $1 + "outline-" + $2;
         }
+        toggleRefreshButton (bClass,outlineBClass,0);
+        toggleRefreshButton (outlineBClass,bClass,0);
     }
 }
 
-// sync = async function () {
-//     const response = await fetch("https://cors-anywhere.herokuapp.com/https://www.prevision-meteo.ch/services/json/list-cities");
-//     const jsonData = await response.json();
-//     let i=0;
-//     for(let a in jsonData) {
-//         console.log("a: " + jsonData[a]);
-//         i++;
-//         if (i == 10) {
-//             break;
-//         }
-//     }   
-//     citiesObject = new Cities(jsonData);
-//     // return jsonData;
-// }
+function checkCities(searchString) {
+    // set search
+    let lowString = searchString.toLowerCase();
+    let regex = `/^(${lowString}).*/`;
+    // escape variables
+    let resetList= 0;
+    let searchCities= new Cities();
+    searchCities = myCities;
+    // iteration on cities list
+    for (let city in searchCities['list']) {
+        // set city test
+        let lowName = searchCities['list'][city]['name'].toLowerCase();
+        var foundB = lowName.match(regex);
+        if (searchCities['list'][city]['name'] === searchString) {
+            // console.log("\t\tsuper");
+            toggleRefreshButton('btn-warning','btn-success',1);
+            // getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['list'][city]['url']}`, 1);
+        }
+        // 
+        else if (foundB) {
+            if (! resetList) {
+                toggleRefreshButton('btn-success','btn-warning',1);
+                myCities.list= [];
+                resetList++;
+            }
+            // console.log(`\tcities: " + ${city['name']}`);
+            document.getElementById('btnSearch').classList.add('btn-success');
+            myCities.addCityToList(searchCities['list'][city]);
+        }
+    }
+}
 
 // async function
 const getMeteoAsync = async function (address, choice) {
@@ -228,9 +260,8 @@ getMeteoAsync("https://www.prevision-meteo.ch/services/json/toulon", 1);
 
 let cityEntry = document.getElementById('inputSearch');
 cityEntry.addEventListener('input', function (e) {
+    toggleRefreshButton('btn-success','btn-warning',0);
     if (e.target.value.length > 2) {
         checkCities(e.target.value)
-
-        console.log("Entry: " + e.target.value);
     }
 });
