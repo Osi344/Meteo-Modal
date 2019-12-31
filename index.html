@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/css?family=Nova+Square&display=swap" rel="stylesheet">
+    <link href="style.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <title>Météo</title>
 </head>
@@ -20,9 +22,11 @@
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div class="modal-body">
-                <div id="currentMeteo" class="d-flex justify-content-center"></div>
-                <div id="nextMeteo" class="d-flex justify-content-center"></div>
+            <div class="container modal-body">
+              <div class="row">
+                <div id="currentMeteo" class="col-12 justify-content-center"></div> <!--d-flex -->
+                <div id="nextMeteo" class="col-12 card-group justify-content-center"></div> <!--d-flex -->
+              </div>
             </div>
             <div class="modal-footer">
                 <form class="form-inline my-2 my-lg-0">

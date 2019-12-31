@@ -19,21 +19,9 @@ class Refresh {
         }
     }
 
-    toggleButton (aClass,bClass,blinkState){
-        // let normalAClass= `btn-${aClass}`;
-        // let outlineAClass= `btn-outline-${aClass}`;
-        // let normalBClass= `btn-${bClass}`;
-        // let outlineBClass= `btn-outline-${bClass}`;
+    toggleButton (aClass,bClass){
         this.refreshButton.classList.remove(aClass);
         this.refreshButton.classList.add(bClass);
-        // if (blinkState) {
-        //     let outlineBClass= "";
-        //     if (bClass= /^(btn-)(.+)$/) {
-        //         outlineBClass= $1 + "outline-" + $2;
-        //     }
-        //     toggleRefreshButton (bClass,outlineBClass,0);
-        //     toggleRefreshButton (outlineBClass,bClass,0);
-        // }
     }
 }
 
@@ -42,6 +30,7 @@ class Cities {
         // this.data = respsonse;
         this.list = [];
         this.match =  "";
+        this.drop = document.getElementById('dropMenu');
     }
 
     addCityToList(newCity) {
@@ -63,11 +52,14 @@ class MeteoCard {
         this.parent = parent;
         this.dayNumber = `fcst_day_${index}`;
         this.cityName = `${response['city_info']['name']}`;
-        this.dayName = `${response[this.dayNumber]['day_long']} ${response[this.dayNumber]['date']}`;
+        this.dayName = `${response[this.dayNumber]['day_long']}`;
+        this.dayFullName = `${this.dayName} ${response[this.dayNumber]['date']}`;
+        // forecast condition & img
         this.condition = `${response[this.dayNumber]['condition']}`;
         this.imgSrc = `${response[this.dayNumber]['icon']}`;
         if (index == 0) {
-            this.imgSrc = `${response[this.dayNumber]['icon_big']}`;
+            this.condition = `${response['current_condition']['condition']}`;
+            this.imgSrc = `${response['current_condition']['icon_big']}`;
             this.hour = `${response['current_condition']['hour']}`;
             this.temp = `Temp: ${response['current_condition']['tmp']}°C`;
             this.wind = `Vent: ${response['current_condition']['wnd_spd']}km/h - ${response['current_condition']['wnd_dir']}`;
@@ -75,17 +67,16 @@ class MeteoCard {
             this.humidity = `Humidité: ${response['current_condition']['humidity']}%`;
         }
         else {
-            this.tempMin = `Tmin: ${response[this.dayNumber]['tmin']}°C`;
-            this.tempMax = `Tmax: ${response[this.dayNumber]['tmax']}°C`;
+            this.tempMin = `${response[this.dayNumber]['tmin']}°C`;
+            this.tempMax = `${response[this.dayNumber]['tmax']}°C`;
         }
 
     }
 
     updateCurrentCard() {
 
-        // image a centrer verticalement
         this.content =
-            `<div class="card w-80 text-center">
+            `<div id="currentCard" class="card w-80 text-center">
                 <div class="row no-gutters">
                     <div class="col-md-4">
                         <img src="${this.imgSrc}" class="card-img" alt="bottom">
@@ -93,7 +84,7 @@ class MeteoCard {
                     <div class="col-md-8">
                         <div class="card-body">
                             <h5 class="card-title">${this.cityName}</h5>
-                            <p class="card-text">${this.dayName}<br>${this.condition} - ${this.temp}</p>
+                            <p class="card-text">${this.dayFullName}<br>${this.condition}<br>${this.temp}</p>
                             <p class="card-text">
                                 <small class="text-muted">${this.wind}<br>${this.pressure} - ${this.humidity}</small>
                             </p>
@@ -105,12 +96,12 @@ class MeteoCard {
 
     updateNextCard() {
         this.content =
-            `<div class="card w-25 text-center">
+            `<div id="nextCard", class="card w-40 text-center">
                 <img src="${this.imgSrc}" class="card-img-top" alt="bottom">
                 <div class="card-body">
                     <p class="card-text">${this.dayName}</p>
                     <p class="card-text">
-                        <small class="text-muted">${this.condition}<br>${this.tempMin} - ${this.tempMax}</small>
+                        <small class="text-muted">${this.tempMin} - ${this.tempMax}</small>
                     </p>
                 </div>
             </div>`;
@@ -120,7 +111,6 @@ class MeteoCard {
 let myRefreshButton = new Refresh();
 let myCities = new Cities();
 let countryFilter = "FRA";
-// https://cors-anywhere.herokuapp.com/https://www.prevision-meteo.ch/services/json/list-cities
 
 function updateInfo(response) {
 
@@ -133,7 +123,7 @@ function updateInfo(response) {
             parent = document.querySelector('#currentMeteo');
         }
 
-        // nouvel objet
+        // new object
         let newCard = new MeteoCard(parent, i, response);
 
         // current
@@ -141,14 +131,14 @@ function updateInfo(response) {
             newCard.updateCurrentCard();
             parent.innerHTML = `${newCard['content']}`;
         }
-        // stockage next
+        // store next forecast
         else {
             newCard.updateNextCard();
             cardArray.push(newCard);
         }
     }
 
-    // prevision
+    // forecast
     let newChildren = "";
     let parent = document.querySelector('#nextMeteo');
     for (let i = 0; i < 4; i++) {
@@ -157,50 +147,45 @@ function updateInfo(response) {
     parent.innerHTML = newChildren;
 }
 
+// init complete French cities list
 function getCities(list) {
-    let myBool= 0;
     for (let i in list) {
         for (let j in list[i]) {
             // countryFilter
-            if ((j == "country") && (list[i][j] == "FRA")) {
+            if ((j == "country") && (list[i][j] == countryFilter)) {
                 const newCity= new City(list[i]['name'], list[i]['url'], i);
                 myCities.addCityToList(newCity);
-                myBool= 1;
             }
         }
-        // if(k>30) {
-        // break;
-        // }
-    }
-    if (myBool) {
-        myCities.index++;
     }
 }
 
-
+// update cities list filtering withs earchString
 function checkCities(searchString) {
+
     // set search
     let lowString = searchString.toLowerCase();
     let regex = `/^(${lowString}).*/`;
+    
     // escape variables
     let resetList= 0;
     let searchCities= new Cities();
     searchCities = myCities;
+    
     // iteration on cities list
     for (let city in searchCities['list']) {
+    
         // set city test
         let lowName = searchCities['list'][city]['name'].toLowerCase();
-        var foundB = lowName.match(regex);
-        if (searchCities['list'][city]['name'] === searchString) {
+        let foundBool = lowName.match(regex);
+        if ((lowName === lowString) || (searchCities['list'][city]['name'] === searchString)) {
             myCities['match']= searchCities['list'][city]['url'];
-            console.log(`url:${searchCities['list'][city]['url']}`);
-            // console.log("\t\tsuper");
-            myRefreshButton.toggleButton('btn-warning','btn-success',1);
+            myRefreshButton.toggleButton('btn-warning','btn-success');
         }
-        // 
-        else if (foundB) {
+        // matching regex - update cities list
+        else if (foundBool) {
             if (! resetList) {
-                myRefreshButton.toggleButton('btn-success','btn-warning',1);
+                myRefreshButton.toggleButton('btn-success','btn-warning');
                 myCities.list= [];
                 resetList++;
             }
@@ -211,28 +196,44 @@ function checkCities(searchString) {
 
 // async function
 const getMeteoAsync = async function (address, choice) {
-    const response = await fetch(address);
-    const jsonData = await response.json();
-    if (choice == 1) {
-        console.log(jsonData);
-        updateInfo(jsonData);
+    try {
+        const response = await fetch(address);
+        // allright
+        if (response.ok) {
+            const jsonData = await response.json();
+            if (choice == 1) {
+                console.log(jsonData);
+                updateInfo(jsonData);
+            }
+            else {
+                getCities(jsonData);
+            }
+        }
+        // server error
+        else {
+            console.error(`Réponse du serveur: ${response.status}`);
+        }
     }
-    else {
-        getCities(jsonData);
+    // no reponse
+    catch(error) {
+        console.error(error);
     }
 }
 
 getMeteoAsync("https://cors-anywhere.herokuapp.com/https://www.prevision-meteo.ch/services/json/list-cities", 0);
 getMeteoAsync("https://www.prevision-meteo.ch/services/json/toulon", 1);
 
+// input search
 let $cityEntry = document.getElementById('inputSearch');
 $cityEntry.addEventListener('input', function (e) {
-    myRefreshButton.toggleButton('btn-success','btn-warning',0);
+    myRefreshButton.toggleButton('btn-success','btn-warning');
+    myCities['match']= "";
     if (e.target.value.length > 2) {
         checkCities(e.target.value)
     }
 });
 
+// refreshbutton
 const $refreshButton= document.getElementById('btnSearch');
 $refreshButton.addEventListener('click', function(){
     myRefreshButton.doRefresh();
