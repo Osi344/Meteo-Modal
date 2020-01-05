@@ -1,6 +1,8 @@
 class Refresh {
     constructor() {
         this.refreshButton= document.getElementById('btnSearch');
+        this.refreshBadge= document.getElementById('numberMatching');
+        this.input= document.getElementById('inputSearch');
     }
 
     getState(){
@@ -16,12 +18,18 @@ class Refresh {
         if (this.getState()){
             console.log(`url match:${myCities['match']}`);
             getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['match']}`, 1);
+            this.input.setAttribute('placeholder','');
+            this.input.innerText= ""; 
         }
     }
 
     toggleButton (aClass,bClass){
         this.refreshButton.classList.remove(aClass);
         this.refreshButton.classList.add(bClass);
+    }
+
+    setRefreshBadge(long){
+        this.refreshBadge.innerText= long;
     }
 }
 
@@ -158,40 +166,60 @@ function getCities(list) {
             }
         }
     }
+    myRefreshButton.setRefreshBadge(myCities['list'].length);
+    myCities['mainList']= myCities['list'];
 }
 
 // update cities list filtering withs earchString
 function checkCities(searchString) {
 
+    console.log(`checkCities-1: ${myCities['list'].length}`);
+    
     // set search
     let lowString = searchString.toLowerCase();
-    let regex = `/^(${lowString}).*/`;
+    let regex = new RegExp ("^" + lowString + ".*");
     
     // escape variables
-    let resetList= 0;
-    let searchCities= new Cities();
-    searchCities = myCities;
+    let countA = countB = 0;
+    myRefreshButton.toggleButton('btn-success','btn-warning');
+    let myCitiesArray= [];
+    
+    // let searchCities= new Cities();
+    // searchCities = myCities;
     
     // iteration on cities list
-    for (let city in searchCities['list']) {
-    
+    for (let city in myCities.list) {
+        
         // set city test
-        let lowName = searchCities['list'][city]['name'].toLowerCase();
-        let foundBool = lowName.match(regex);
-        if ((lowName === lowString) || (searchCities['list'][city]['name'] === searchString)) {
-            myCities['match']= searchCities['list'][city]['url'];
+        let lowName = myCities['list'][city]['name'].toLowerCase();
+        
+        countA++;
+        if (countA<10){
+            console.log(`regex:${regex}`);
+            console.log(`countA:${countA}`);
+            console.log(`lowName:${lowName}`);
+        }
+
+        let foundBool = regex.test(lowName);
+
+        if ((lowName === lowString) || (myCities['list'][city]['name'] === searchString)) {
+            myCities['match']= myCities['list'][city]['url'];
             myRefreshButton.toggleButton('btn-warning','btn-success');
         }
         // matching regex - update cities list
         else if (foundBool) {
-            if (! resetList) {
-                myRefreshButton.toggleButton('btn-success','btn-warning');
-                myCities.list= [];
-                resetList++;
+
+            countB++;    
+            if (countB<10) {
+                console.log(`foundBool:${countB}`);
             }
-            myCities.addCityToList(searchCities['list'][city]);
+            myCitiesArray.push(myCities['list'][city]);
         }
     }
+    // ici
+    myCities.list= [];
+    myCities.list = myCitiesArray;
+    myRefreshButton.setRefreshBadge(myCities['list'].length);
 }
 
 // async function
@@ -207,6 +235,7 @@ const getMeteoAsync = async function (address, choice) {
             }
             else {
                 getCities(jsonData);
+                console.log(`Sortie getCities: ${myCities['list'].length}`);
             }
         }
         // server error
@@ -237,4 +266,5 @@ $cityEntry.addEventListener('input', function (e) {
 const $refreshButton= document.getElementById('btnSearch');
 $refreshButton.addEventListener('click', function(){
     myRefreshButton.doRefresh();
+    myCities['list'] = myCities['mainList'];
 })
