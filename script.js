@@ -1,52 +1,52 @@
 class Refresh {
     constructor() {
-        this.refreshButton= document.getElementById('btnSearch');
-        this.refreshBadge= document.getElementById('numberMatching');
-        this.input= document.getElementById('inputSearch');
+        this.refreshButton = document.getElementById('btnSearch');
+        this.refreshBadge = document.getElementById('numberMatching');
+        this.input = document.getElementById('inputSearch');
     }
 
-    getState(){
-        let state= false;
+    getState() {
+        let state = false;
         if (this.refreshButton.classList.contains('btn-success')) {
-            state= true;
+            state = true;
         }
         console.log(`state:${state}`);
         return state;
     }
 
-    doRefresh(){
-        if (this.getState()){
+    doRefresh() {
+        if (this.getState()) {
             console.log(`url match:${myCities['match']}`);
             getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['match']}`, 1);
-            this.input.setAttribute('placeholder','');
-            this.input.textContent= ""; 
+            this.input.setAttribute('placeholder', '');
+            this.input.textContent = "";
             this.setRefreshBadge(myCities['list'].length);
         }
     }
 
-    toggleButton (aClass,bClass){
+    toggleButton(aClass, bClass) {
         this.refreshButton.classList.remove(aClass);
         this.refreshButton.classList.add(bClass);
     }
 
-    setRefreshBadge(long){
-        this.refreshBadge.innerText= long;
+    setRefreshBadge(long) {
+        this.refreshBadge.innerText = long;
     }
 }
 
 class Cities {
     constructor() {
         this.list = [];
-        this.match =  "";
+        this.match = "";
     }
-    
+
     addCityToList(newCity) {
         this.list.push(newCity);
     }
-    
-    reset(){
+
+    reset() {
         this.list = this.mainList;
-        this.match =  "";
+        this.match = "";
     }
 }
 
@@ -165,76 +165,105 @@ function getCities(list) {
         for (let j in list[i]) {
             // countryFilter
             if ((j == "country") && (list[i][j] == countryFilter)) {
-                const newCity= new City(list[i]['name'], list[i]['url'], i);
+                const newCity = new City(list[i]['name'], list[i]['url'], i);
                 myCities.addCityToList(newCity);
             }
         }
     }
     myRefreshButton.setRefreshBadge(myCities['list'].length);
-    myCities['mainList']= myCities['list'];
+    myCities['mainList'] = myCities['list'];
+}
+
+function createDrop(tabCities) {
+    let tabDrop = [];
+    for (let city in tabCities) {
+        tabDrop.push(`<button class="dropdown-item" type="button>${tabCities[city]['name']}</button>`);
+    }
+    return tabDrop;
 }
 
 // update cities list filtering withs earchString
 function checkCities(searchString) {
 
     console.log(`checkCities-1: ${myCities['list'].length}`);
-    
+
     // set search
     let lowString = searchString.toLowerCase();
-    let regex = new RegExp ("^" + lowString + ".*");
-    
+    let regex = new RegExp("^" + lowString + ".*");
+
     // escape variables
-    let countA = countB = 0;
-    myRefreshButton.toggleButton('btn-success','btn-warning');
-    let myCitiesArray= [];
-    
-    // let searchCities= new Cities();
-    // searchCities = myCities;
-    
+    myRefreshButton.toggleButton('btn-success', 'btn-warning');
+    let myCitiesArray = [];
+
     // iteration on cities list
     for (let city in myCities.list) {
-        
+
         // set city test
         let lowName = myCities['list'][city]['name'].toLowerCase();
-        
-        countA++;
-        if (countA<10){
-            console.log(`regex:${regex}`);
-            console.log(`countA:${countA}`);
-            console.log(`lowName:${lowName}`);
-        }
-
         let foundBool = regex.test(lowName);
 
         if ((lowName === lowString) || (myCities['list'][city]['name'] === searchString)) {
-            myCities['match']= myCities['list'][city]['url'];
-            myRefreshButton.toggleButton('btn-warning','btn-success');
+            myCities['match'] = myCities['list'][city]['url'];
+            myRefreshButton.toggleButton('btn-warning', 'btn-success');
         }
         // matching regex - update cities list
         else if (foundBool) {
-
-            countB++;    
-            if (countB<10) {
-                console.log(`foundBool:${countB}`);
-            }
             myCitiesArray.push(myCities['list'][city]);
         }
     }
 
-    // uniq value left
-    if (myCitiesArray.length == 1) {
-        // myCities['match']= myCitiesArray['list']['0']['url'];
-        for (let i in myCitiesArray['list']) {
-            console.log(`\t- i:${i} -`);
-            myCities['match']= myCitiesArray['list'][i]['url'];
-        }
-        myRefreshButton.toggleButton('btn-warning','btn-success');
-    }
-
     // ici
-    myCities.list= [];
+    myCities.list = [];
     myCities.list = myCitiesArray;
     myRefreshButton.setRefreshBadge(myCities['list'].length);
+
+    // list matching cities
+    if (myCities['list'].length <= 20) {
+        console.log("TUTU");
+        // let tabDrop= createDrop();
+        let $dropDown = document.getElementById('dropDown');
+
+
+
+        // $dropDown.innerHTML= `${createDrop(myCitiesArray['list']).join('')}`;
+
+        for (let city in myCities['list']) {
+            console.log(`\tville de drop: ${myCities['list'][city]['name']}`);
+
+            // let newElt = document.createElement('button');
+            let newElt = document.createElement('a');   
+
+            // newElt.setAttribute('type', 'button');
+            newElt.classList.add('dropdown-item', 'alert-info', 'alert-link');
+            newElt.textContent = `${myCities['list'][city]['name']}`;
+
+            // `<button class="dropdown-item" type="button>${myCitiesArray[city]['name']}</button>`;
+
+            $dropDown.appendChild(newElt);
+            // $dropDown.setAttribute('z-index', '1060');
+
+            // $dropDown.appendChild(`<a class="dropdown-item" href="#">${myCities['list'][city]['name']}</a>`);
+        }
+        // let tabDrop= [];
+        // for(let city in tabCities) {
+        //     tabDrop.push(`<a class="dropdown-item" href="#">${tabCities[city]['name']}</a>`);
+        // }       
+    }
+
+    // uniq value left
+    if (myCities['list'].length == 1) {
+        // myCities['match']= myCitiesArray['list']['0']['url'];
+        for (let i in myCities['list']) {
+            console.log(`\t- i:${i} -`);
+            myCities['match'] = myCities['list'][i]['url'];
+        }
+        myRefreshButton.toggleButton('btn-warning', 'btn-success');
+    }
+
+    // // ici
+    // myCities.list= [];
+    // myCities.list = myCitiesArray;
+    // myRefreshButton.setRefreshBadge(myCities['list'].length);
 }
 
 // async function
@@ -259,7 +288,7 @@ const getMeteoAsync = async function (address, choice) {
         }
     }
     // no reponse
-    catch(error) {
+    catch (error) {
         console.error(error);
     }
 }
@@ -268,15 +297,15 @@ getMeteoAsync("https://cors-anywhere.herokuapp.com/https://www.prevision-meteo.c
 getMeteoAsync("https://www.prevision-meteo.ch/services/json/toulon", 1);
 
 
-let oldLength= 0;
+let oldLength = 0;
 // input search
 let $cityEntry = document.getElementById('inputSearch');
 $cityEntry.addEventListener('input', function (e) {
-    myRefreshButton.toggleButton('btn-success','btn-warning');
-    myCities['match']= "";
+    myRefreshButton.toggleButton('btn-success', 'btn-warning');
+    myCities['match'] = "";
     let currentLength = e.target.value.length;
-    if ( currentLength > 2) {
-        if (currentLength > oldLength){
+    if (currentLength > 2) {
+        if (currentLength > oldLength) {
             checkCities(e.target.value);
         }
         else {
@@ -288,8 +317,8 @@ $cityEntry.addEventListener('input', function (e) {
 });
 
 // refreshbutton
-const $refreshButton= document.getElementById('btnSearch');
-$refreshButton.addEventListener('click', function(){
+const $refreshButton = document.getElementById('btnSearch');
+$refreshButton.addEventListener('click', function () {
     myRefreshButton.doRefresh();
     // myCities['list'] = myCities['mainList']
     myCities.reset();

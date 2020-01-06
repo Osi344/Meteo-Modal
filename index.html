@@ -24,15 +24,19 @@
             </div>
             <div class="container modal-body">
               <div class="row">
-                <div id="currentMeteo" class="col-12 justify-content-center"></div> <!--d-flex -->
-                <div id="nextMeteo" class="col-12 card-group justify-content-center"></div> <!--d-flex -->
+                <div id="currentMeteo" class="col-12 justify-content-center"></div>
+                <div id="nextMeteo" class="col-12 card-group justify-content-center"></div>
               </div>
             </div>
             <div class="modal-footer">
                 <form class="form-inline my-2 my-lg-0">
-                    <input id="inputSearch" type="text" placeholder="Toulon" class="form-control mr-sm-2">
+                    <input id="inputSearch" type="text" placeholder="Toulon" class="form-control sm-2">
                     <br>
-                    <button type="button" id="btnSearch" class="btn btn-warning m-1">Rafraîchir&nbsp;<span id="numberMatching" class="badge badge-light p-1">0</span></button>
+                    <div class="btn-group dropup">
+                      <button type="button" id="btnSearch" class="btn btn-warning m-1 dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rafraîchir&nbsp;<span id="numberMatching" class="badge badge-light p-1">0</span>&nbsp;</button>
+                      <div id="dropDown" class="dropdown-menu dropdown-menu-right text-left">
+                      </div>
+                    </div>
                     <button type="button" class="btn btn-secondary m-1" data-dismiss="modal">Fermer</button>
                 </form>
             </div>

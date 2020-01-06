@@ -17,3 +17,11 @@
 #currentCard {
     margin-bottom: 1em;
 }
+
+#dropDown {
+    /* font-size: x-small; */
+    font-size: smaller;
+    overflow: auto;
+    min-width: 340px; 
+    max-height: 400px;
+}
