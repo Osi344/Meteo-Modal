@@ -6,9 +6,9 @@ class Refresh {
     }
 
     getState(){
-        let state= 0;
+        let state= false;
         if (this.refreshButton.classList.contains('btn-success')) {
-            state++;
+            state= true;
         }
         console.log(`state:${state}`);
         return state;
@@ -19,7 +19,8 @@ class Refresh {
             console.log(`url match:${myCities['match']}`);
             getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['match']}`, 1);
             this.input.setAttribute('placeholder','');
-            this.input.innerText= ""; 
+            this.input.textContent= ""; 
+            this.setRefreshBadge(myCities['list'].length);
         }
     }
 
@@ -35,14 +36,17 @@ class Refresh {
 
 class Cities {
     constructor() {
-        // this.data = respsonse;
         this.list = [];
         this.match =  "";
-        this.drop = document.getElementById('dropMenu');
     }
-
+    
     addCityToList(newCity) {
         this.list.push(newCity);
+    }
+    
+    reset(){
+        this.list = this.mainList;
+        this.match =  "";
     }
 }
 
@@ -84,7 +88,7 @@ class MeteoCard {
     updateCurrentCard() {
 
         this.content =
-            `<div id="currentCard" class="card w-80 text-center">
+            `<div id="currentCard" class="card text-center">
                 <div class="row no-gutters">
                     <div class="col-md-4">
                         <img src="${this.imgSrc}" class="card-img" alt="bottom">
@@ -104,7 +108,7 @@ class MeteoCard {
 
     updateNextCard() {
         this.content =
-            `<div id="nextCard", class="card w-40 text-center">
+            `<div id="nextCard", class="card text-center">
                 <img src="${this.imgSrc}" class="card-img-top" alt="bottom">
                 <div class="card-body">
                     <p class="card-text">${this.dayName}</p>
@@ -216,6 +220,17 @@ function checkCities(searchString) {
             myCitiesArray.push(myCities['list'][city]);
         }
     }
+
+    // uniq value left
+    if (myCitiesArray.length == 1) {
+        // myCities['match']= myCitiesArray['list']['0']['url'];
+        for (let i in myCitiesArray['list']) {
+            console.log(`\t- i:${i} -`);
+            myCities['match']= myCitiesArray['list'][i]['url'];
+        }
+        myRefreshButton.toggleButton('btn-warning','btn-success');
+    }
+
     // ici
     myCities.list= [];
     myCities.list = myCitiesArray;
@@ -252,19 +267,30 @@ const getMeteoAsync = async function (address, choice) {
 getMeteoAsync("https://cors-anywhere.herokuapp.com/https://www.prevision-meteo.ch/services/json/list-cities", 0);
 getMeteoAsync("https://www.prevision-meteo.ch/services/json/toulon", 1);
 
+
+let oldLength= 0;
 // input search
 let $cityEntry = document.getElementById('inputSearch');
 $cityEntry.addEventListener('input', function (e) {
     myRefreshButton.toggleButton('btn-success','btn-warning');
     myCities['match']= "";
-    if (e.target.value.length > 2) {
-        checkCities(e.target.value)
+    let currentLength = e.target.value.length;
+    if ( currentLength > 2) {
+        if (currentLength > oldLength){
+            checkCities(e.target.value);
+        }
+        else {
+            myCities.reset();
+            myRefreshButton.setRefreshBadge();
+        }
     }
+    oldLength = currentLength;
 });
 
 // refreshbutton
 const $refreshButton= document.getElementById('btnSearch');
 $refreshButton.addEventListener('click', function(){
     myRefreshButton.doRefresh();
-    myCities['list'] = myCities['mainList'];
+    // myCities['list'] = myCities['mainList']
+    myCities.reset();
 })
