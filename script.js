@@ -175,11 +175,22 @@ function getCities(list) {
 }
 
 function createDrop(tabCities) {
-    let tabDrop = [];
+    // element
+    let $dropDown = document.getElementById('dropDown');
+    
+    // clear element children
+    $dropDown.innerHTML= "";
+ 
+    // create new children
     for (let city in tabCities) {
-        tabDrop.push(`<button class="dropdown-item" type="button>${tabCities[city]['name']}</button>`);
+        let newElt = document.createElement('a');   
+        // AJOUTER fonction click
+        newElt.setAttribute('type', 'button');
+        newElt.classList.add('dropdown-item', 'alert-info', 'alert-link');
+        newElt.textContent = `${tabCities[city]['name']}`;
+        $dropDown.appendChild(newElt);
     }
-    return tabDrop;
+    return 1;
 }
 
 // update cities list filtering withs earchString
@@ -218,36 +229,8 @@ function checkCities(searchString) {
     myRefreshButton.setRefreshBadge(myCities['list'].length);
 
     // list matching cities
-    if (myCities['list'].length <= 20) {
-        console.log("TUTU");
-        // let tabDrop= createDrop();
-        let $dropDown = document.getElementById('dropDown');
-
-
-
-        // $dropDown.innerHTML= `${createDrop(myCitiesArray['list']).join('')}`;
-
-        for (let city in myCities['list']) {
-            console.log(`\tville de drop: ${myCities['list'][city]['name']}`);
-
-            // let newElt = document.createElement('button');
-            let newElt = document.createElement('a');   
-
-            // newElt.setAttribute('type', 'button');
-            newElt.classList.add('dropdown-item', 'alert-info', 'alert-link');
-            newElt.textContent = `${myCities['list'][city]['name']}`;
-
-            // `<button class="dropdown-item" type="button>${myCitiesArray[city]['name']}</button>`;
-
-            $dropDown.appendChild(newElt);
-            // $dropDown.setAttribute('z-index', '1060');
-
-            // $dropDown.appendChild(`<a class="dropdown-item" href="#">${myCities['list'][city]['name']}</a>`);
-        }
-        // let tabDrop= [];
-        // for(let city in tabCities) {
-        //     tabDrop.push(`<a class="dropdown-item" href="#">${tabCities[city]['name']}</a>`);
-        // }       
+    if (myCities['list'].length <= 30) {
+        let bool= createDrop(myCities['list']);
     }
 
     // uniq value left
