@@ -2,6 +2,7 @@ class Refresh {
     constructor() {
         this.refreshButton = document.getElementById('btnSearch');
         this.refreshBadge = document.getElementById('numberMatching');
+        this.toggleDrop = document.getElementById('toggleDrop');
         this.input = document.getElementById('inputSearch');
     }
 
@@ -15,18 +16,21 @@ class Refresh {
     }
 
     doRefresh() {
+
         if (this.getState()) {
-            console.log(`url match:${myCities['match']}`);
-            getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['match']}`, 1);
-            this.input.setAttribute('placeholder', '');
-            this.input.textContent = "";
+            // getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['match']}`, 1);
+            getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['list'][myCities['match']]['url']}`, 1);
+            this.input.removeAttribute('placeholder');
+            this.input.value = myCities['list'][myCities['match']]['name'];
             this.setRefreshBadge(myCities['list'].length);
         }
     }
 
     toggleButton(aClass, bClass) {
         this.refreshButton.classList.remove(aClass);
+        this.toggleDrop.classList.remove(aClass);
         this.refreshButton.classList.add(bClass);
+        this.toggleDrop.classList.add(bClass);
     }
 
     setRefreshBadge(long) {
@@ -82,7 +86,6 @@ class MeteoCard {
             this.tempMin = `${response[this.dayNumber]['tmin']}°C`;
             this.tempMax = `${response[this.dayNumber]['tmax']}°C`;
         }
-
     }
 
     updateCurrentCard() {
@@ -214,8 +217,10 @@ function checkCities(searchString) {
         let foundBool = regex.test(lowName);
 
         if ((lowName === lowString) || (myCities['list'][city]['name'] === searchString)) {
-            myCities['match'] = myCities['list'][city]['url'];
+            // myCities['match'] = myCities['list'][city]['url'];
+            myCities['match'] = city;
             myRefreshButton.toggleButton('btn-warning', 'btn-success');
+            myCitiesArray.push(myCities['list'][city]);
         }
         // matching regex - update cities list
         else if (foundBool) {
@@ -236,11 +241,15 @@ function checkCities(searchString) {
     // uniq value left
     if (myCities['list'].length == 1) {
         // myCities['match']= myCitiesArray['list']['0']['url'];
+
         for (let i in myCities['list']) {
             console.log(`\t- i:${i} -`);
-            myCities['match'] = myCities['list'][i]['url'];
+            // myCities['match'] = myCities['list'][i]['url'];
+            myCities['match'] = i;
         }
+
         myRefreshButton.toggleButton('btn-warning', 'btn-success');
+        myRefreshButton.doRefresh();
     }
 
     // // ici
