@@ -173,8 +173,8 @@ function getCities(list) {
             }
         }
     }
-    myRefreshButton.setRefreshBadge(myCities['list'].length);
     myCities['mainList'] = myCities['list'];
+    myRefreshButton.setRefreshBadge(myCities['list'].length);
 }
 
 function createDrop(tabCities) {
@@ -189,10 +189,21 @@ function createDrop(tabCities) {
         let newElt = document.createElement('a');   
         // AJOUTER fonction click
         newElt.setAttribute('type', 'button');
+        newElt.setAttribute('data-name', city);
         newElt.classList.add('dropdown-item', 'alert-info', 'alert-link');
         newElt.textContent = `${tabCities[city]['name']}`;
         $dropDown.appendChild(newElt);
     }
+    $('.dropdown-item').click(function(e) {
+        let linkCity= e.currentTarget.getAttribute("data-name");
+        myCities['match'] = linkCity;
+        myRefreshButton.toggleButton('btn-warning', 'btn-success');
+        myRefreshButton.doRefresh();
+        myCities.reset();
+        myRefreshButton.setRefreshBadge(myCities['list'].length);
+    });
+
+
     return 1;
 }
 
@@ -302,7 +313,7 @@ $cityEntry.addEventListener('input', function (e) {
         }
         else {
             myCities.reset();
-            myRefreshButton.setRefreshBadge();
+            myRefreshButton.setRefreshBadge(myCities['list'].length);
         }
     }
     oldLength = currentLength;
@@ -312,6 +323,6 @@ $cityEntry.addEventListener('input', function (e) {
 const $refreshButton = document.getElementById('btnSearch');
 $refreshButton.addEventListener('click', function () {
     myRefreshButton.doRefresh();
-    // myCities['list'] = myCities['mainList']
     myCities.reset();
+    myRefreshButton.setRefreshBadge(myCities['list'].length);
 })
