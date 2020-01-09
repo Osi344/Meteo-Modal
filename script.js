@@ -127,6 +127,7 @@ class MeteoCard {
 let myRefreshButton = new Refresh();
 let myCities = new Cities();
 let countryFilter = "FRA";
+let boolFade= 0;
 
 function updateInfo(response) {
 
@@ -181,13 +182,13 @@ function getCities(list) {
 function createDrop(tabCities) {
     // element
     let $dropDown = document.getElementById('dropDown');
-    
+
     // clear element children
-    $dropDown.innerHTML= "";
- 
+    $dropDown.innerHTML = "";
+
     // create new children
     for (let city in tabCities) {
-        let newElt = document.createElement('a');   
+        let newElt = document.createElement('a');
         // AJOUTER fonction click
         newElt.setAttribute('type', 'button');
         newElt.setAttribute('data-name', city);
@@ -197,8 +198,8 @@ function createDrop(tabCities) {
     }
 
     // click on dropdown-item
-    $('.dropdown-item').click(function(e) {
-        let linkCity= e.currentTarget.getAttribute("data-name");
+    $('.dropdown-item').click(function (e) {
+        let linkCity = e.currentTarget.getAttribute("data-name");
         myCities['match'] = linkCity;
         myRefreshButton.toggleButton('btn-warning', 'btn-success');
         myRefreshButton.doRefresh();
@@ -221,7 +222,7 @@ function checkCities(searchString) {
     // escape variables
     myRefreshButton.toggleButton('btn-success', 'btn-warning');
     let myCitiesArray = [];
-    let indexCity= -1;
+    let indexCity = -1;
 
     // iteration on cities list
     for (let city in myCities.list) {
@@ -252,7 +253,7 @@ function checkCities(searchString) {
 
     // list matching cities
     if (myCities['list'].length <= 30) {
-        let bool= createDrop(myCities['list']);
+        let bool = createDrop(myCities['list']);
     }
 
     // uniq value left
@@ -336,3 +337,15 @@ $refreshButton.addEventListener('click', function () {
     myCities.reset();
     myRefreshButton.setRefreshBadge(myCities['list'].length);
 })
+
+// fade back when dropdown
+$('#toggleDrop').click(function () {
+    if (!boolFade) {
+        $('#fadeModal').fadeTo('fast', 0.4);
+    }
+    else {
+        $('#fadeModal').fadeTo('fast', 1);
+    }
+    boolFade++;
+    boolFade= boolFade % 2;
+});
