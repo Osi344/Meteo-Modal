@@ -11,7 +11,6 @@ class Refresh {
         if (this.refreshButton.classList.contains('btn-success')) {
             state = true;
         }
-        console.log(`state:${state}`);
         return state;
     }
 
@@ -19,7 +18,6 @@ class Refresh {
 
         if (this.getState()) {
             // getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['match']}`, 1);
-            console.log(`-- myCities-match: ${myCities['match']} -`);
             getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['list'][myCities['match']]['url']}`, 1);
             this.input.removeAttribute('placeholder');
             this.input.value = myCities['list'][myCities['match']]['name'];
@@ -127,7 +125,6 @@ class MeteoCard {
 let myRefreshButton = new Refresh();
 let myCities = new Cities();
 let countryFilter = "FRA";
-let boolFade= 0;
 
 function updateInfo(response) {
 
@@ -192,7 +189,7 @@ function createDrop(tabCities) {
         // AJOUTER fonction click
         newElt.setAttribute('type', 'button');
         newElt.setAttribute('data-name', city);
-        newElt.classList.add('dropdown-item', 'alert-info');
+        newElt.classList.add('dropdown-item', 'alert-info' );
         newElt.textContent = `${tabCities[city]['name']}`;
         $dropDown.appendChild(newElt);
     }
@@ -201,10 +198,10 @@ function createDrop(tabCities) {
     $('.dropdown-item').click(function (e) {
         let linkCity = e.currentTarget.getAttribute("data-name");
         myCities['match'] = linkCity;
+        // oldLength
+        // currentLength
         myRefreshButton.toggleButton('btn-warning', 'btn-success');
         myRefreshButton.doRefresh();
-        myCities.reset();
-        myRefreshButton.setRefreshBadge(myCities['list'].length);
     });
 
     return 1;
@@ -212,8 +209,6 @@ function createDrop(tabCities) {
 
 // update cities list filtering withs earchString
 function checkCities(searchString) {
-
-    console.log(`checkCities-1: ${myCities['list'].length}`);
 
     // set search
     let lowString = searchString.toLowerCase();
@@ -223,6 +218,7 @@ function checkCities(searchString) {
     myRefreshButton.toggleButton('btn-success', 'btn-warning');
     let myCitiesArray = [];
     let indexCity = -1;
+    let aloneCity= "";
 
     // iteration on cities list
     for (let city in myCities.list) {
@@ -234,18 +230,17 @@ function checkCities(searchString) {
         if ((lowName === lowString) || (myCities['list'][city]['name'] === searchString)) {
             // myCities['match'] = myCities['list'][city]['url'];
             indexCity++;
-            myCities['match'] = indexCity; //city;
+            myCities['match'] = indexCity;
             myRefreshButton.toggleButton('btn-warning', 'btn-success');
             myCitiesArray.push(myCities['list'][city]);
         }
         // matching regex - update cities list
         else if (foundBool) {
             indexCity++;
+            aloneCity= indexCity;
             myCitiesArray.push(myCities['list'][city]);
         }
     }
-    console.log(`-1- myCities-match: ${myCities['match']} -`);
-
     // ici
     myCities.list = [];
     myCities.list = myCitiesArray;
@@ -259,22 +254,12 @@ function checkCities(searchString) {
     // uniq value left
     if (myCities['list'].length == 1) {
 
-        for (let i in myCities['list']) {
-            console.log(`\t- i:${i} -`);
-            // myCities['match'] = myCities['list'][i]['url'];
-            myCities['match'] = i;
-        }
-
+        myCities['match']= aloneCity;
+        currentLength= myCities['list'][aloneCity]['name'].length;
+        // oldLength= currentLength-1;
         myRefreshButton.toggleButton('btn-warning', 'btn-success');
         myRefreshButton.doRefresh();
     }
-
-    // // ici
-    // myCities.list= [];
-    // myCities.list = myCitiesArray;
-    // myRefreshButton.setRefreshBadge(myCities['list'].length);
-
-    console.log(`-2- myCities-match: ${myCities['match']} -`);
 }
 
 // async function
@@ -315,37 +300,38 @@ $cityEntry.addEventListener('input', function (e) {
     myRefreshButton.toggleButton('btn-success', 'btn-warning');
     myCities['match'] = "";
     let currentLength = e.target.value.length;
+    console.log(`target:${e.target.value} - old:${oldLength} - cur:${currentLength}`);
+
     if (currentLength > 2) {
         if (currentLength > oldLength) {
+            console.log('ici');
             checkCities(e.target.value);
         }
+        else if (currentLength == oldLength){
+
+        }
         else {
+            console.log('ou la');
             myCities.reset();
+            checkCities($('input:text').val());
             myRefreshButton.setRefreshBadge(myCities['list'].length);
         }
     }
     oldLength = currentLength;
-    console.log(`-3- myCities-match: ${myCities['match']} -`);
 });
 
-// refreshbutton
-const $refreshButton = document.getElementById('btnSearch');
-$refreshButton.addEventListener('click', function () {
-    console.log("Refresh");
-    console.log(`-4- myCities-match: ${myCities['match']} -`);
-    myRefreshButton.doRefresh();
-    myCities.reset();
-    myRefreshButton.setRefreshBadge(myCities['list'].length);
-})
+$(document).ready(function () {
 
-// fade back when dropdown
-$('#toggleDrop').click(function () {
-    if (!boolFade) {
+    // refresh the forecasts
+    $('#btnSearch').on('click', function () {
+        myRefreshButton.doRefresh();
+    });
+    // fade on when dropdown show
+    $('.dropdown').on('show.bs.dropdown', function () {
         $('#fadeModal').fadeTo('fast', 0.4);
-    }
-    else {
+    });
+    // fade off when dropdown hide
+    $('.dropdown').on('hide.bs.dropdown', function () {
         $('#fadeModal').fadeTo('fast', 1);
-    }
-    boolFade++;
-    boolFade= boolFade % 2;
+    });
 });
