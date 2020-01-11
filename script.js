@@ -19,12 +19,10 @@ $(document).ready(function () {
         doRefresh() {
 
             if (this.getState()) {
-                // getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['match']}`, 1);
                 getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['list'][myCities['match']]['url']}`, 1);
-                this.input.removeAttribute('placeholder');
 
                 // WARNING
-                //this.input.value = myCities['list'][myCities['match']]['name'];
+                // $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
 
                 this.setRefreshBadge(myCities.getListLength());
             }
@@ -72,8 +70,6 @@ $(document).ready(function () {
 
     class InputCity {
         constructor() {
-            // this.inputElement= $('#inputSearch');
-            // this.inputElement = document.getElementById('inputSearch').value;
             this.newLength = 1;
             this.oldLength = 0;
             this.way = true;
@@ -81,7 +77,7 @@ $(document).ready(function () {
 
         checkWay() {
             // set boolean
-            let diff = this.newLentgh - this.oldLength;
+            let diff = this.newLength - this.oldLength;
             if (diff >= 1) {
                 this.way = true;
             }
@@ -98,10 +94,11 @@ $(document).ready(function () {
         }
 
         setLengthValues() {
+            console.log('entree setLengthValues '+$('#inputSearch').val());
             this.oldLength = this.newLength;
             this.newLength = $('#inputSearch').val().length;
-            console.log(`old: ${this.oldLength} - new: ${this.newLength}`);
             this.checkWay();
+            console.log('sortie setLengthValues '+ this.way);
         }
 
         show() {
@@ -248,8 +245,8 @@ $(document).ready(function () {
         $('.dropdown-item').click(function (e) {
             let linkCity = e.currentTarget.getAttribute("data-name");
             myCities['match'] = linkCity;
-            // oldLength
-            // currentLength
+            $('#inpuSearch').val(e.currentTarget.textContent);
+            myInput.setLengthValues();
             myRefreshButton.toggleButton('btn-warning', 'btn-success');
             myRefreshButton.doRefresh();
         });
@@ -260,6 +257,7 @@ $(document).ready(function () {
     // update cities list filtering withs earchString
     function checkCities(searchString) {
 
+        console.log(`checkCities:${searchString}`);
         // set search
         let lowString = searchString.toLowerCase();
         let regex = new RegExp("^" + lowString + ".*");
@@ -303,18 +301,22 @@ $(document).ready(function () {
         // uniq value left
         if (myCities.getListLength() == 1) {
 
-            myCities['match'] = aloneCity;
-
             // WARNING
-            myInput.value = myCities['list'][myCities['match']]['name'];
+            // myInput.value= myCities['list'][myCities['match']]['name'];
             myInput.setLengthValues();
-            //currentLength= myCities['list'][aloneCity]['name'].length;
+            console.log('=1');
+            myInput.show();
 
-            // oldLength= currentLength-1;
-            myRefreshButton.toggleButton('btn-warning', 'btn-success');
-            myRefreshButton.doRefresh();
+            if (myInput.way) {
+                myCities['match']= aloneCity;
+                $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
+                myInput.setLengthValues();
+                myRefreshButton.toggleButton('btn-warning', 'btn-success');
+                myRefreshButton.doRefresh();
+            }
         }
         myRefreshButton.setRefreshBadge(myCities.getListLength());
+        console.log('sortie checkCities:'+$('#inputSearch').val());
     }
 
     // async function
@@ -353,35 +355,23 @@ $(document).ready(function () {
         myRefreshButton.toggleButton('btn-success', 'btn-warning');
         myCities['match'] = "";
         myInput.setLengthValues();
+        console.log('input');
         myInput.show();
 
         if (myInput.newLength > 2) {
             if (!myInput.way) {
                 myCities.reset();
             }
-            // checkCities(e.target.value);
-            checkCities($('input:text').val());
+            // else {
+                // checkCities(e.target.value);
+                console.log($('input:text').val());
+                checkCities($('input:text').val());
+            // }
         }
-
-        // currentLength = e.target.value.length;
-        // console.log(`target:${e.target.value} - old:${oldLength} - cur:${currentLength}`);
-
-        // if (currentLength > 2) {
-        //     if (currentLength > oldLength) {
-        //         console.log('ici');
-        //         checkCities(e.target.value);
-        //     }
-        //     else if (currentLength == oldLength){
-
-        //     }
-        //     else {
-        //         console.log('ou la');
-        //         myCities.reset();
-        //         checkCities($('input:text').val());
-        //         myRefreshButton.setRefreshBadge(myCities['list'].length);
-        //     // }
-        // }
-        // oldLength = currentLength;
+        else if (!myInput.way) {
+            myCities.reset();
+            myRefreshButton.setRefreshBadge(myCities.getListLength());
+        }
     });
 
     // refresh the forecasts
@@ -395,5 +385,9 @@ $(document).ready(function () {
     // fade off when dropdown hide
     $('.dropdown').on('hide.bs.dropdown', function () {
         $('#fadeModal').fadeTo('fast', 1);
+    });
+    //  remove place holder
+    $('#inputSearch').on('click', function(e) { 
+        $('#inputSearch').removeAttr('placeholder');
     });
 });
