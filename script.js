@@ -95,11 +95,9 @@ $(document).ready(function () {
         }
 
         setLengthValues() {
-            console.log('entree setLengthValues '+$('#inputSearch').val());
             this.oldLength = this.newLength;
             this.newLength = $('#inputSearch').val().length;
             this.checkWay();
-            console.log('sortie setLengthValues '+ this.way);
         }
 
         show() {
@@ -155,17 +153,17 @@ $(document).ready(function () {
             </div>`;
         }
 
-        updateNextCard() {
+        updateNextCard(index) {
             this.content =
-                `<div id="nextCard", class="card text-center">
-                <img src="${this.imgSrc}" class="card-img-top" alt="bottom">
-                <div class="card-body">
-                    <p class="card-text">${this.dayName}</p>
-                    <p class="card-text">
-                        <small class="text-muted">${this.tempMin} - ${this.tempMax}</small>
-                    </p>
-                </div>
-            </div>`;
+                `<div id="card-${index}", class="card text-center hidden">
+                    <img src="${this.imgSrc}" class="card-img-top" alt="bottom">
+                    <div class="card-body">
+                        <p class="card-text">${this.dayName}</p>
+                        <p class="card-text">
+                            <small class="text-muted">${this.tempMin} - ${this.tempMax}</small>
+                        </p>
+                    </div>
+                </div>`;
         }
     }
 
@@ -195,18 +193,15 @@ $(document).ready(function () {
             }
             // store next forecast
             else {
-                newCard.updateNextCard();
+                newCard.updateNextCard(i);
                 cardArray.push(newCard);
             }
         }
 
         // forecast
-        let newChildren = "";
-        let parent = document.querySelector('#nextMeteo');
         for (let i = 0; i < 4; i++) {
-            newChildren += `${cardArray[i]['content']}`;
+            $('#nextMeteo').append(`${cardArray[i]['content']}`);
         }
-        parent.innerHTML = newChildren;
     }
 
     // init complete French cities list
@@ -257,7 +252,6 @@ $(document).ready(function () {
     // update cities list filtering withs earchString
     function checkCities(searchString) {
 
-        console.log(`checkCities:${searchString}`);
         // set search
         let lowString = searchString.toLowerCase();
         let regex = new RegExp("^" + lowString + ".*");
@@ -288,7 +282,6 @@ $(document).ready(function () {
                 myCitiesArray.push(myCities['list'][city]);
             }
         }
-        // ici
         myCities.list = [];
         myCities.list = myCitiesArray;
         myRefreshButton.setRefreshBadge(myCities.getListLength());
@@ -304,18 +297,9 @@ $(document).ready(function () {
 
         // uniq value left
         if (myCities.getListLength() == 1) {
-
-            // WARNING
-            // myInput.value= myCities['list'][myCities['match']]['name'];
-            // myInput.setLengthValues();
-            console.log('=1');
-            myInput.show();
-
             myRefreshButton.toggleButton('btn-warning', 'btn-success');
             if (myInput.way) {
                 myCities['match']= aloneCity;
-                // $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
-                // myInput.setLengthValues();
                 myRefreshButton.doRefresh();
             }
         }
@@ -324,7 +308,6 @@ $(document).ready(function () {
         }
         
         myRefreshButton.setRefreshBadge(myCities.getListLength());
-        console.log('sortie checkCities:'+$('#inputSearch').val());
     }
 
     // async function
@@ -355,7 +338,6 @@ $(document).ready(function () {
 
     getMeteoAsync("https://cors-anywhere.herokuapp.com/https://www.prevision-meteo.ch/services/json/list-cities", 0);
     getMeteoAsync("https://www.prevision-meteo.ch/services/json/toulon", 1);
-    myInput.show();
 
     // input search
     let $cityEntry = document.getElementById('inputSearch');
@@ -363,16 +345,12 @@ $(document).ready(function () {
         myRefreshButton.toggleButton('btn-success', 'btn-warning');
         myCities['match'] = "";
         myInput.setLengthValues();
-        console.log('input');
-        myInput.show();
 
         if (myInput.newLength > 2) {
             if (!myInput.way) {
                 myCities.reset();
             }
             // else {
-                // checkCities(e.target.value);
-                console.log($('input:text').val());
                 checkCities($('input:text').val());
             // }
         }
