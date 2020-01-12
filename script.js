@@ -23,7 +23,8 @@ $(document).ready(function () {
 
                 // WARNING
                 // $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
-
+                $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
+                myInput.setLengthValues();
                 this.setRefreshBadge(myCities.getListLength());
             }
         }
@@ -226,6 +227,7 @@ $(document).ready(function () {
     function createDrop(tabCities) {
         // element
         let $dropDown = document.getElementById('dropDown');
+        // let $dropDown = $('#dropDown').html();
 
         // clear element children
         $dropDown.innerHTML = "";
@@ -250,8 +252,6 @@ $(document).ready(function () {
             myRefreshButton.toggleButton('btn-warning', 'btn-success');
             myRefreshButton.doRefresh();
         });
-
-        return 1;
     }
 
     // update cities list filtering withs earchString
@@ -295,7 +295,11 @@ $(document).ready(function () {
 
         // list matching cities
         if (myCities.getListLength() <= 30) {
-            let bool = createDrop(myCities['list']);
+            createDrop(myCities['list']);
+        }
+        else {
+            //$('#dropDown').html();
+            document.getElementById('dropDown').innerHTML= "";
         }
 
         // uniq value left
@@ -303,18 +307,22 @@ $(document).ready(function () {
 
             // WARNING
             // myInput.value= myCities['list'][myCities['match']]['name'];
-            myInput.setLengthValues();
+            // myInput.setLengthValues();
             console.log('=1');
             myInput.show();
 
+            myRefreshButton.toggleButton('btn-warning', 'btn-success');
             if (myInput.way) {
                 myCities['match']= aloneCity;
-                $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
-                myInput.setLengthValues();
-                myRefreshButton.toggleButton('btn-warning', 'btn-success');
+                // $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
+                // myInput.setLengthValues();
                 myRefreshButton.doRefresh();
             }
         }
+        else if (myCities.getListLength() == 0) {
+            alert('Aucune ville correspondante');
+        }
+        
         myRefreshButton.setRefreshBadge(myCities.getListLength());
         console.log('sortie checkCities:'+$('#inputSearch').val());
     }
