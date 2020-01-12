@@ -1,178 +1,23 @@
 $(document).ready(function () {
-
-    class Refresh {
-        constructor() {
-            this.refreshButton = document.getElementById('btnSearch');
-            this.refreshBadge = document.getElementById('numberMatching');
-            this.toggleDrop = document.getElementById('toggleDrop');
-            this.input = document.getElementById('inputSearch');
-        }
-
-        getState() {
-            let state = false;
-            if (this.refreshButton.classList.contains('btn-success')) {
-                state = true;
-            }
-            return state;
-        }
-
-        doRefresh() {
-
-            if (this.getState()) {
-                getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['list'][myCities['match']]['url']}`, 1);
-
-                // WARNING
-                // $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
-                $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
-                myInput.setLengthValues();
-                this.setRefreshBadge(myCities.getListLength());
-            }
-        }
-
-        toggleButton(aClass, bClass) {
-            this.refreshButton.classList.remove(aClass);
-            this.toggleDrop.classList.remove(aClass);
-            this.refreshButton.classList.add(bClass);
-            this.toggleDrop.classList.add(bClass);
-        }
-
-        setRefreshBadge(long) {
-            this.refreshBadge.innerText = long;
-        }
-    }
-
-    class Cities {
-        constructor() {
-            this.list = [];
-            this.match = "";
-        }
-
-        addCityToList(newCity) {
-            this.list.push(newCity);
-        }
-
-        reset() {
-            this.list = this.mainList;
-            this.match = "";
-        }
-
-        getListLength() {
-            return this.list.length;
-        }
-    }
-
-    class City {
-        constructor(name, url, index) {
-            this.name = name;
-            this.url = url;
-            this.index = index;
-        }
-    }
-
-    class InputCity {
-        constructor() {
-            this.newLength = 1;
-            this.oldLength = 0;
-            this.way = true;
-        }
-
-        checkWay() {
-            // set boolean
-            let diff = this.newLength - this.oldLength;
-            if (diff >= 1) {
-                this.way = true;
-            }
-            else if (diff <= -1) {
-                this.way = false;
-            }
-            // check oldLength
-            if (Math.abs(diff) > 1) {
-                this.oldLength = this.newLength - 1;
-            }
-            if (this.oldLength < 0) {
-                this.oldLength = 0;
-            }
-        }
-
-        setLengthValues() {
-            this.oldLength = this.newLength;
-            this.newLength = $('#inputSearch').val().length;
-            this.checkWay();
-        }
-
-        show() {
-            let text= $('#inputSearch').val();
-            console.log(`\tmyInput.show:\n\t\ttext:${text}\n\t\told:${this.oldLength}\n\t\tnew:${this.newLength}\n\t\tway:${this.way}\n`);
-        }
-    }
-
-    class MeteoCard {
-        constructor(parent, index, response) {
-
-            this.parent = parent;
-            this.dayNumber = `fcst_day_${index}`;
-            this.cityName = `${response['city_info']['name']}`;
-            this.dayName = `${response[this.dayNumber]['day_long']}`;
-            this.dayFullName = `${this.dayName} ${response[this.dayNumber]['date']}`;
-            // forecast condition & img
-            this.condition = `${response[this.dayNumber]['condition']}`;
-            this.imgSrc = `${response[this.dayNumber]['icon']}`;
-            if (index == 0) {
-                this.condition = `${response['current_condition']['condition']}`;
-                this.imgSrc = `${response['current_condition']['icon_big']}`;
-                this.hour = `${response['current_condition']['hour']}`;
-                this.temp = `Temp: ${response['current_condition']['tmp']}°C`;
-                this.wind = `Vent: ${response['current_condition']['wnd_spd']}km/h - ${response['current_condition']['wnd_dir']}`;
-                this.pressure = `Pression: ${response['current_condition']['pressure']}hPa`;
-                this.humidity = `Humidité: ${response['current_condition']['humidity']}%`;
-            }
-            else {
-                this.tempMin = `${response[this.dayNumber]['tmin']}°C`;
-                this.tempMax = `${response[this.dayNumber]['tmax']}°C`;
-            }
-        }
-
-        updateCurrentCard() {
-
-            this.content =
-                `<div id="currentCard" class="card text-center">
-                <div class="row no-gutters">
-                    <div class="col-md-4">
-                        <img src="${this.imgSrc}" class="card-img" alt="bottom">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="card-title">${this.cityName}</h5>
-                            <p class="card-text">${this.dayFullName}<br>${this.condition}<br>${this.temp}</p>
-                            <p class="card-text">
-                                <small class="text-muted">${this.wind}<br>${this.pressure} - ${this.humidity}</small>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        updateNextCard(index) {
-            this.content =
-                `<div id="card-${index}", class="card text-center hidden">
-                    <img src="${this.imgSrc}" class="card-img-top" alt="bottom">
-                    <div class="card-body">
-                        <p class="card-text">${this.dayName}</p>
-                        <p class="card-text">
-                            <small class="text-muted">${this.tempMin} - ${this.tempMax}</small>
-                        </p>
-                    </div>
-                </div>`;
-        }
-    }
-
+    
+    // global variables
     let myRefreshButton = new Refresh();
     let myCities = new Cities();
     let myInput = new InputCity();
     let countryFilter = "FRA";
 
-    function updateInfo(response) {
+    function doRefresh() {
+
+        if (myRefreshButton.getState()) {
+            getMeteoAsync(`https://www.prevision-meteo.ch/services/json/${myCities['list'][myCities['match']]['url']}`, 1);
+            $('#inputSearch').val(`${myCities['list'][myCities['match']]['name']}`);
+            myInput.setLengthValues();
+            myRefreshButton.setRefreshBadge(myCities.getListLength());
+        }
+    }
+
+    // refresh the screen
+    function updateForecasts(response) {
 
         let cardArray = [];
         for (let i = 0; i < 5; i++) {
@@ -199,6 +44,7 @@ $(document).ready(function () {
         }
 
         // forecast
+        $('#nextMeteo').empty();
         for (let i = 0; i < 4; i++) {
             $('#nextMeteo').append(`${cardArray[i]['content']}`);
         }
@@ -219,6 +65,7 @@ $(document).ready(function () {
         myRefreshButton.setRefreshBadge(myCities.getListLength());
     }
 
+    // create dropdown list regarding filter
     function createDrop(tabCities) {
         // element
         let $dropDown = document.getElementById('dropDown');
@@ -245,11 +92,12 @@ $(document).ready(function () {
             $('#inpuSearch').val(e.currentTarget.textContent);
             myInput.setLengthValues();
             myRefreshButton.toggleButton('btn-warning', 'btn-success');
-            myRefreshButton.doRefresh();
+            doRefresh();
+
         });
     }
 
-    // update cities list filtering withs earchString
+    // update cities list filtering with searchString
     function checkCities(searchString) {
 
         // set search
@@ -291,8 +139,7 @@ $(document).ready(function () {
             createDrop(myCities['list']);
         }
         else {
-            //$('#dropDown').html();
-            document.getElementById('dropDown').innerHTML= "";
+            $('#dropDown').empty();
         }
 
         // uniq value left
@@ -300,7 +147,7 @@ $(document).ready(function () {
             myRefreshButton.toggleButton('btn-warning', 'btn-success');
             if (myInput.way) {
                 myCities['match']= aloneCity;
-                myRefreshButton.doRefresh();
+                doRefresh();
             }
         }
         else if (myCities.getListLength() == 0) {
@@ -319,7 +166,7 @@ $(document).ready(function () {
                 const jsonData = await response.json();
                 if (choice == 1) {
                     console.log(jsonData);
-                    updateInfo(jsonData);
+                    updateForecasts(jsonData);
                 }
                 else {
                     getCities(jsonData);
@@ -362,7 +209,7 @@ $(document).ready(function () {
 
     // refresh the forecasts
     $('#btnSearch').on('click', function () {
-        myRefreshButton.doRefresh();
+        doRefresh();
     });
     // fade on when dropdown show
     $('.dropdown').on('show.bs.dropdown', function () {
@@ -375,5 +222,31 @@ $(document).ready(function () {
     //  remove place holder
     $('#inputSearch').on('click', function(e) { 
         $('#inputSearch').removeAttr('placeholder');
+    });
+    // return key
+    $('#inputSearch').on('keypress', function(e){
+        let code = (e.keyCode ? e.keyCode : e.which);
+        console.log(`code touche: ${code}`);
+        if(code == 13) { //La touche Entrée a été appuyée   
+            doRefresh();
+        }     
+        // else {
+        //     myRefreshButton.toggleButton('btn-success', 'btn-warning');
+        //     myCities['match'] = "";
+        //     myInput.setLengthValues();
+
+        //     if (myInput.newLength > 2) {
+        //         if (!myInput.way) {
+        //             myCities.reset();
+        //         }
+        //         // else {
+        //             checkCities($('input:text').val());
+        //         // }
+        //     }
+        //     else if (!myInput.way) {
+        //         myCities.reset();
+        //         myRefreshButton.setRefreshBadge(myCities.getListLength());
+        //     }  
+        // }
     });
 });
