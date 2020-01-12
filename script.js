@@ -174,12 +174,12 @@ $(document).ready(function () {
             }
             // server error
             else {
-                console.error(`Réponse du serveur: ${response.status}`);
+                alert(`Réponse du serveur: ${response.status}`);
             }
         }
         // no reponse
         catch (error) {
-            console.error(error);
+            alert(error);
         }
     }
 
@@ -188,7 +188,7 @@ $(document).ready(function () {
 
     // input search
     let $cityEntry = document.getElementById('inputSearch');
-    $cityEntry.addEventListener('input', function (e) {
+    $cityEntry.addEventListener('input', function () {
         myRefreshButton.toggleButton('btn-success', 'btn-warning');
         myCities['match'] = "";
         myInput.setLengthValues();
@@ -207,6 +207,8 @@ $(document).ready(function () {
         }
     });
 
+    // JQuery events    
+
     // refresh the forecasts
     $('#btnSearch').on('click', function () {
         doRefresh();
@@ -223,30 +225,12 @@ $(document).ready(function () {
     $('#inputSearch').on('click', function(e) { 
         $('#inputSearch').removeAttr('placeholder');
     });
-    // return key
+    // enter key
     $('#inputSearch').on('keypress', function(e){
-        let code = (e.keyCode ? e.keyCode : e.which);
-        console.log(`code touche: ${code}`);
-        if(code == 13) { //La touche Entrée a été appuyée   
+        let keyCode = (e.keyCode ? e.keyCode : e.which);
+        // enter key code
+        if(keyCode == 13) { 
             doRefresh();
-        }     
-        // else {
-        //     myRefreshButton.toggleButton('btn-success', 'btn-warning');
-        //     myCities['match'] = "";
-        //     myInput.setLengthValues();
-
-        //     if (myInput.newLength > 2) {
-        //         if (!myInput.way) {
-        //             myCities.reset();
-        //         }
-        //         // else {
-        //             checkCities($('input:text').val());
-        //         // }
-        //     }
-        //     else if (!myInput.way) {
-        //         myCities.reset();
-        //         myRefreshButton.setRefreshBadge(myCities.getListLength());
-        //     }  
-        // }
+        }
     });
 });
